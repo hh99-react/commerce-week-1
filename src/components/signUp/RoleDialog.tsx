@@ -19,6 +19,7 @@ import {
 } from "../ui/select";
 import useUserMutations from "@/hooks/queries/user/useUserMutations";
 import { IGoogleUser } from "@/types/types";
+import { getKoreaTimeDate } from "@/shared/form/common";
 
 interface RoleDialogProps {
   open: boolean;
@@ -32,7 +33,7 @@ const RoleDialog = ({ open, setOpen, googleUserData }: RoleDialogProps) => {
   const saveUserInfoButtonHandler = () => {
     const { id, name, email } = googleUserData;
     const isSeller = selectedValue === "seller" ? true : false;
-    const date = new Date();
+    const date = getKoreaTimeDate();
     const newUser = {
       id: id,
       nickname: name,

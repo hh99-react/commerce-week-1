@@ -8,8 +8,15 @@ export const addUserToDatabase = async (
   setIsSeller: (isSeller: boolean) => void
 ) => {
   const db = getDatabase();
+  const timestampCreatedAt = newUser.createdAt.getTime();
+  const timestampUpdatedAt = newUser.updatedAt.getTime();
+  const userWithTimestamp = {
+    ...newUser,
+    createdAt: timestampCreatedAt,
+    updatedAt: timestampUpdatedAt,
+  };
   try {
-    set(ref(db, "users/" + newUser.id), newUser);
+    set(ref(db, "users/" + newUser.id), userWithTimestamp);
     setUser(newUser);
     setIsSeller(newUser.isSeller);
     localStorage.setItem("userId", newUser.id);

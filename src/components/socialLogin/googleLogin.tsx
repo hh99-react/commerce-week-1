@@ -131,7 +131,6 @@ const GoogleLogin = ({
 
   const handleError = useCallback(
     (res: objectType) => {
-      console.log("여기니???????????");
       onReject({
         provider: "google",
         data: res,
@@ -145,7 +144,6 @@ const GoogleLogin = ({
       setIsSdkLoaded(true);
     } else {
       insertScriptGoogle(document, "script", SCRIPT_ID, JS_SRC, () => {
-        console.log("typeResponse", typeResponse);
         const params = {
           client_id,
           ux_mode,
@@ -182,8 +180,6 @@ const GoogleLogin = ({
         }
 
         if (client) setInstance(client);
-        console.log(client);
-
         setIsSdkLoaded(true);
       });
     }

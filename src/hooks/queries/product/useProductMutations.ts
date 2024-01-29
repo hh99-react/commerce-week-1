@@ -24,7 +24,6 @@ const useProductMutations = ({
       await addProduct(newProduct, imageDownloadURLs);
     },
     onSuccess: () => {
-      console.log("asdf");
       queryClient.resetQueries({
         queryKey: ["productsBySellerId", sellerId],
       });

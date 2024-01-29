@@ -78,8 +78,12 @@ export const addProduct = async (
     createdAt: timestampCreatedAt,
     updatedAt: timestampUpdatedAt,
   };
-  const db = getDatabase();
-  set(ref(db, `products/${sellerId}/${productId}`), productWithImagesAndTime);
+  try {
+    const db = getDatabase();
+    set(ref(db, `products/${sellerId}/${productId}`), productWithImagesAndTime);
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 export const updateProduct = async (

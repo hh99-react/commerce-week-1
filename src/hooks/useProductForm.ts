@@ -64,11 +64,12 @@ const useProductForm = ({ userId, updateProduct }: useProductFormProps) => {
           );
         } catch (error) {
           console.error("Error downloading images:", error);
+        } finally {
+          setIsLoading(false);
         }
       }
     };
     setFormValues();
-    setIsLoading(false);
   }, [updateProduct]);
 
   const onSubmitAddProduct = async (
