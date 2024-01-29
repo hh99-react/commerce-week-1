@@ -15,7 +15,7 @@ import { IResolveParams } from "@/types/types";
 const Login = () => {
   const [provider, setProvider] = useState("");
   const [profile, setProfile] = useState<any>();
-
+  console.log(provider, profile);
   return (
     <div className="mt-20 mx-auto px-[10%]">
       <Card className="w-3/4 absolute -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 sm:w-[400px]">

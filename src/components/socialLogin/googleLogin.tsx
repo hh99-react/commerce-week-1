@@ -82,81 +82,6 @@ const GoogleLogin = ({
     []
   );
 
-  const onGetMe = useCallback(
-    (res: objectType) => {
-      if (typeResponse === "accessToken") {
-        const headers = new Headers({
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: "Bearer " + res.access_token,
-        });
-
-        fetch(`https://www.googleapis.com/oauth2/v3/userinfo?alt=json`, {
-          method: "GET",
-          headers,
-        })
-          .then((response) => response.json())
-          .then((response) => {
-            const data: objectType = { ...res, ...response };
-            onResolve({
-              provider: "google",
-              data,
-            });
-          })
-          .catch((err) => {
-            onReject(err);
-          });
-      } else {
-        fetch(
-          `https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=${res.credential}`,
-          {
-            method: "GET",
-          }
-        )
-          .then((response) => response.json())
-          .then((response) => {
-            const data: objectType = { ...res, ...response };
-            onResolve({
-              provider: "google",
-              data,
-            });
-          })
-          .catch((err) => {
-            onReject(err);
-          });
-      }
-    },
-    [typeResponse, onReject, onResolve]
-  );
-
-  // const handleResponse = useCallback(
-  //   (res: objectType) => {
-  //     if (res && access_type === "offline")
-  //       onResolve({
-  //         provider: "google",
-  //         data: res,
-  //       });
-  //     else {
-  //       if (res?.access_token) {
-  //         if (isOnlyGetToken)
-  //           onResolve({
-  //             provider: "google",
-  //             data: res,
-  //           });
-  //         else onGetMe(res);
-  //       } else {
-  //         const data: objectType = res;
-  //         if (isOnlyGetToken)
-  //           onResolve({
-  //             provider: "google",
-  //             data,
-  //           });
-  //         else onGetMe(res);
-  //       }
-  //     }
-  //   },
-  //   [access_type, isOnlyGetToken, onGetMe, onResolve]
-  // );
-
   const handleResponse = useCallback(
     (res: objectType) => {
       if (res && access_type === "offline") {
@@ -283,11 +208,6 @@ const GoogleLogin = ({
       onReject("Google SDK isn't loaded!");
     } else {
       window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${client_id}&redirect_uri=${redirect_uri}&response_type=token&scope=email profile`;
-      // if (instance)
-      //   access_type === "offline"
-      //     ? instance.requestCode()
-      //     : instance.requestAccessToken();
-      // else _window.google.accounts.id.prompt();
     }
   }, [access_type, instance, isSdkLoaded, load, onReject]);
 

@@ -10,9 +10,9 @@ interface UserContextProps {
 
 const contextDefaultValues: UserContextProps = {
   user: null,
-  setUser: (user) => {},
+  setUser: () => {},
   isSeller: null,
-  setIsSeller: (isSeller) => {},
+  setIsSeller: () => {},
 };
 
 const UserContext = createContext(contextDefaultValues);
