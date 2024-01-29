@@ -24,11 +24,12 @@ const useProductMutations = ({
       await addProduct(newProduct, imageDownloadURLs);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
+      console.log("asdf");
+      queryClient.resetQueries({
         queryKey: ["productsBySellerId", sellerId],
       });
-      setIsLoading(false);
       navigate("/products");
+      setIsLoading(false);
     },
     onError: (error) => {
       console.log(error);
