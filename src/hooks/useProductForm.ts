@@ -31,8 +31,8 @@ const useProductForm = ({ userId, updateProduct }: useProductFormProps) => {
   });
 
   useEffect(() => {
-    setIsLoading(true);
     const setFormValues = async () => {
+      setIsLoading(true);
       if (updateProduct) {
         const imageURLs = updateProduct.productImage;
         setShowImages(imageURLs as string[]);
@@ -69,7 +69,7 @@ const useProductForm = ({ userId, updateProduct }: useProductFormProps) => {
         }
       }
     };
-    setFormValues();
+    updateProduct && setFormValues();
   }, [updateProduct]);
 
   const onSubmitAddProduct = async (
