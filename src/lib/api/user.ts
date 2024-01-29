@@ -1,0 +1,48 @@
+import { IUser } from "@/types/types";
+import { getDatabase, ref, set, get, child } from "firebase/database";
+import axios from "axios";
+
+export const addUserToDatabase = async (
+  newUser: IUser,
+  setUser: (user: IUser) => void,
+  setIsSeller: (isSeller: boolean) => void
+) => {
+  const db = getDatabase();
+  try {
+    set(ref(db, "users/" + newUser.id), newUser);
+    setUser(newUser);
+    setIsSeller(newUser.isSeller);
+    localStorage.setItem("userId", newUser.id);
+    localStorage.setItem("isSeller", String(newUser.isSeller));
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const getUserFromGoogle = async (accessToken: string) => {
+  try {
+    const { data } = await axios.get(
+      `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${accessToken}`
+    );
+    return data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+export const getUserFromDatabase = async (userId: string) => {
+  const dbRef = ref(getDatabase());
+  try {
+    const snapshot = await get(child(dbRef, `users/${userId}`));
+    if (snapshot.exists()) {
+      const user = snapshot.val();
+      return user;
+    } else {
+      console.log("No data available");
+      return null;
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
