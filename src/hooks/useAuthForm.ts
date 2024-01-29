@@ -14,11 +14,10 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { auth } from "@/firebase";
-import { getDatabase, ref, child, get, set } from "firebase/database";
 
 import { IUser } from "@/types/types";
 import { useUser } from "@/store/UserContext";
-import { addUserToDatabase, getUserFromDatabase } from "@/lib/api/user";
+import { getUserFromDatabase } from "@/lib/api/user";
 import useUserMutations from "./queries/user/useUserMutations";
 
 export type ServerErrorResponse = {

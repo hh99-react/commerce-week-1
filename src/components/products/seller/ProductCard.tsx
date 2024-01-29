@@ -19,11 +19,7 @@ interface ProductCardProps {
   isLoadingProductListBySeller: boolean;
 }
 
-const ProductCard = ({
-  product,
-  setIsLoading,
-  isLoadingProductListBySeller,
-}: ProductCardProps) => {
+const ProductCard = ({ product, setIsLoading }: ProductCardProps) => {
   const { user } = useUser();
   const userId = user ? user.id : localStorage.getItem("userId");
   const navigate = useNavigate();
