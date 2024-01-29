@@ -1,28 +1,61 @@
 import { IProduct } from "@/types/types";
-import { getDatabase, ref, set, get, query, remove } from "firebase/database";
 import {
-  getStorage,
-  ref as storageRef,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject,
-  listAll,
-} from "firebase/storage";
+  getDatabase,
+  ref,
+  set,
+  get,
+  query,
+  remove,
+  update,
+  child,
+  orderByChild,
+  limitToLast,
+  endAt,
+} from "firebase/database";
 
-export const getProductsBySeller = async (userId: string) => {
+export const getProductsBySeller = async (
+  userId: string,
+  pageParam: number
+) => {
+  const dbRef = ref(getDatabase());
+  const queryRef = query(
+    child(dbRef, `products/${userId}/`),
+    orderByChild("createdAt"),
+    endAt(pageParam - 1),
+    limitToLast(12)
+  );
+  try {
+    const snapshot = await get(queryRef);
+    if (snapshot.exists()) {
+      const productsArray: IProduct[] = [];
+      snapshot.forEach((childSnapshot) => {
+        productsArray.push(childSnapshot.val());
+      });
+      const fetchedProducts = Object.keys(snapshot.val());
+      const nextPageParam =
+        fetchedProducts.length < 12 ? null : productsArray[0].createdAt;
+      const sortedProductsArray = productsArray.reverse();
+
+      return { sortedProductsArray, nextPageParam };
+    } else {
+      return { sortedProductsArray: [], nextPageParam: null };
+    }
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+export const getSingleProduct = async (userId: string, productId: string) => {
   const db = getDatabase();
-  const userProductsPath = `products/${userId}`;
-  const q = query(ref(db, userProductsPath));
+  const userProductPath = `products/${userId}/${productId}`;
+  const q = query(ref(db, userProductPath));
 
   try {
     const snapshot = await get(q);
     if (snapshot.exists()) {
       const productsObject = snapshot.val();
-      const productsArray = Object.keys(productsObject).map((key) => ({
-        id: key,
-        ...productsObject[key],
-      }));
-      return productsArray;
+      return productsObject;
     } else {
       return null;
     }
@@ -31,43 +64,46 @@ export const getProductsBySeller = async (userId: string) => {
   }
 };
 
-export const addProduct = async (newProduct: IProduct) => {
-  const storage = getStorage();
-  const childStorageRef = storageRef(storage, "product-images");
-  const { productImage, id, productName, sellerId } = newProduct;
+export const addProduct = async (
+  newProduct: IProduct,
+  imageDownloadURLs: string[]
+) => {
+  const { id: productId, sellerId } = newProduct;
+  const timestampCreatedAt = newProduct.createdAt.getTime();
+  const timestampUpdatedAt = newProduct.updatedAt.getTime();
 
-  const uploadImagePromises: Promise<string>[] = [];
-
-  for (let i = 0; i < productImage.length; i++) {
-    const image = productImage[i];
-    if (image instanceof File) {
-      const fileName = `${productName}-${i}`;
-      const imageRef = storageRef(childStorageRef, `${id}/${fileName}`);
-      const snapshot = await uploadBytes(imageRef, image);
-      const imageDownloadURLPromise = getDownloadURL(snapshot.ref);
-      uploadImagePromises.push(imageDownloadURLPromise);
-    }
-  }
-
-  const imageDownloadURLs = await Promise.all(uploadImagePromises);
-  const productWithImages = { ...newProduct, productImage: imageDownloadURLs };
-
+  const productWithImagesAndTime = {
+    ...newProduct,
+    productImage: imageDownloadURLs,
+    createdAt: timestampCreatedAt,
+    updatedAt: timestampUpdatedAt,
+  };
   const db = getDatabase();
-  set(ref(db, "products/" + `${sellerId}/` + id), productWithImages);
+  set(ref(db, `products/${sellerId}/${productId}`), productWithImagesAndTime);
 };
 
-export const updateProduct = async () => {};
+export const updateProduct = async (
+  updateProduct: IProduct,
+  imageDownloadURLs: string[]
+) => {
+  const { id: productId, sellerId } = updateProduct;
+  const timestampUpdatedAt =
+    updateProduct.updatedAt instanceof Date
+      ? updateProduct.updatedAt.getTime()
+      : updateProduct.updatedAt;
+  const productWithImagesAndTime = {
+    ...updateProduct,
+    productImage: imageDownloadURLs,
+    updatedAt: timestampUpdatedAt,
+  };
+  const db = getDatabase();
+  update(
+    ref(db, `products/${sellerId}/${productId}`),
+    productWithImagesAndTime
+  );
+};
 
 export const deleteProduct = async (productId: string, sellerId: string) => {
-  const storage = getStorage();
-  const productImagesRef = storageRef(storage, `product-images/${productId}`);
-  try {
-    const result = await listAll(productImagesRef);
-    await Promise.all(result.items.map((item) => deleteObject(item)));
-  } catch (error) {
-    console.error("An error occurred while deleting the file:", error);
-  }
-
   const db = getDatabase();
   remove(ref(db, `products/${sellerId}/${productId}`));
 };

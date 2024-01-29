@@ -1,15 +1,10 @@
-import AllProduct from "@/components/seller/AllProduct";
-import ProductDialog from "@/components/seller/ProductDialog";
+import AllProduct from "@/components/products/seller/AllProduct";
 
 const Products = () => {
+  const isSeller = localStorage.getItem("isSeller") === "true" ? true : false;
+
   return (
-    <div className="mt-20 mx-auto px-[10%]">
-      <div className="flex items-center justify-between">
-        <p className="text-xl font-bold">전체 상품</p>
-        <ProductDialog />
-      </div>
-      <AllProduct />
-    </div>
+    <div className="mt-20 mx-auto px-[10%]">{isSeller && <AllProduct />}</div>
   );
 };
 

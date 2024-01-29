@@ -1,14 +1,17 @@
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { auth } from "@/firebase";
 import { useToast } from "@/components/ui/use-toast";
 
+export const AnyRoute = (): React.ReactElement => {
+  return <Outlet />;
+};
+
 export const PrivateRoute = (): React.ReactElement => {
-  const user = auth.currentUser;
-  const token = localStorage.getItem("userId");
   const { toast } = useToast();
+  const user = localStorage.getItem("userId");
+
   const userCheck = (user: any | null): boolean => {
-    if (user || token) {
+    if (user) {
       return true;
     } else {
       toast({
@@ -24,11 +27,11 @@ export const PrivateRoute = (): React.ReactElement => {
 };
 
 export const PublicRoute = (): React.ReactElement => {
-  const user = auth.currentUser;
-  const token = localStorage.getItem("userId");
   const { toast } = useToast();
+  const user = localStorage.getItem("userId");
+
   const userCheck = (user: any | null): boolean => {
-    if (user || token) {
+    if (user) {
       toast({
         variant: "destructive",
         title: "로그인 상태입니다.",
@@ -42,6 +45,21 @@ export const PublicRoute = (): React.ReactElement => {
   return userCheck(user) ? <Navigate to="/" /> : <Outlet />;
 };
 
-export const AnyRoute = (): React.ReactElement => {
-  return <Outlet />;
+export const SellerRoute = (): React.ReactElement => {
+  const { toast } = useToast();
+  const isSeller = localStorage.getItem("isSeller") === "true" ? true : false;
+
+  const sellerCheck = (isSeller: boolean): boolean => {
+    if (isSeller) {
+      return true;
+    } else {
+      toast({
+        variant: "destructive",
+        title: "판매자만 접근 가능합니다.",
+        duration: 1000,
+      });
+      return false;
+    }
+  };
+  return sellerCheck(isSeller) ? <Outlet /> : <Navigate to="/" />;
 };

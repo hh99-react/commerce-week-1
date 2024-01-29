@@ -21,19 +21,33 @@ export function SignUpForm() {
   const { isLoading, signUpForm, onSubmitSignUp, goToLoginOrSignUp } =
     useAuthForm();
 
+  const checkPasswordWithEmail = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    onChange: (value: string) => void
+  ) => {
+    const emailId = signUpForm.getValues("email")?.split("@")[0];
+    const passwordInputValue = event.target.value;
+    if (passwordInputValue?.includes(emailId)) {
+      signUpForm.setValue("password", "prevent@135");
+      onChange("prevent@135");
+    } else {
+      onChange(event.target.value);
+    }
+  };
+
   return (
     <Form {...signUpForm}>
       <form
         onSubmit={signUpForm.handleSubmit(onSubmitSignUp)}
         className="relative"
       >
-        <div className="p-2 flex justify-between space-x-2">
+        <div className="p-2 flex flex-col justify-between md:space-x-2 md:flex-row">
           <FormField
             control={signUpForm.control}
             name="name"
             render={({ field }) => (
               <>
-                <FormItem className="w-[40%]">
+                <FormItem className="md:w-[40%]">
                   <FormLabel>이름</FormLabel>
                   <FormControl>
                     <Input placeholder="홍길동" {...field} />
@@ -48,7 +62,7 @@ export function SignUpForm() {
             name="email"
             render={({ field }) => (
               <>
-                <FormItem className="w-[40%]">
+                <FormItem className="md:w-[40%]">
                   <FormLabel>이메일</FormLabel>
                   <FormControl>
                     <Input placeholder="hello@sparta.com" {...field} />
@@ -62,7 +76,7 @@ export function SignUpForm() {
             control={signUpForm.control}
             name="role"
             render={({ field }) => (
-              <FormItem className="w-[20%]">
+              <FormItem className="md:w-[20%]">
                 <FormLabel>역할</FormLabel>
                 <Select
                   onValueChange={field.onChange}
@@ -83,16 +97,23 @@ export function SignUpForm() {
             )}
           />
         </div>
-        <div className="p-2 flex justify-between space-x-4">
+        <div className="p-2 flex flex-col justify-between md:flex-row md:space-x-4">
           <FormField
             control={signUpForm.control}
             name="password"
-            render={({ field }) => (
+            render={({ field: { onChange }, ...field }) => (
               <>
-                <FormItem className="w-1/2">
+                <FormItem className="md:w-1/2">
                   <FormLabel>비밀번호</FormLabel>
                   <FormControl>
-                    <Input {...field} type="password" name="password" />
+                    <Input
+                      {...field}
+                      type="password"
+                      name="password"
+                      onChange={(event) => {
+                        checkPasswordWithEmail(event, onChange);
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -104,10 +125,10 @@ export function SignUpForm() {
             name="confirmPassword"
             render={({ field }) => (
               <>
-                <FormItem className="w-1/2">
+                <FormItem className="md:w-1/2">
                   <FormLabel>비밀번호 확인</FormLabel>
                   <FormControl>
-                    <Input {...field} type="password" />
+                    <Input {...field} type="password" name="confirmPassword" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -115,7 +136,7 @@ export function SignUpForm() {
             )}
           />
         </div>
-        <div className="p-2 flex gap-2">
+        <div className="p-2 flex gap-2 justify-center sm:justify-start">
           <Button type="submit" disabled={isLoading}>
             계정 등록하기
           </Button>

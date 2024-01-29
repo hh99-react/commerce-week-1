@@ -1,6 +1,7 @@
 // import React from 'react'
 import { signOut } from "firebase/auth";
-import { auth } from "@/firebase";
+import { getAuth } from "firebase/auth";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useToast } from "../ui/use-toast";
 import { Button } from "../ui/button";
@@ -10,12 +11,16 @@ const NavBar = () => {
   const location = useLocation();
   const path = location.pathname;
   const { toast } = useToast();
-  const user = auth.currentUser;
+
+  const auth = getAuth();
+  const [user, loading] = useAuthState(auth);
+  const user1 = user ? user : localStorage.getItem("userId");
 
   const logButtonHandler = async () => {
-    if (user) {
+    if (user1) {
       await signOut(auth);
       localStorage.removeItem("userId");
+      localStorage.removeItem("isSeller");
 
       toast({
         variant: "green",
@@ -32,18 +37,27 @@ const NavBar = () => {
         <span className="cursor-pointer" onClick={() => navigate("/")}>
           Logo
         </span>
-        {user ? (
+        {!loading && user1 ? (
           <div className="space-x-4">
-            <Button onClick={() => navigate("/products")}>상품페이지</Button>
+            <Button
+              className={path === "/products" ? "hidden" : "none"}
+              onClick={() => navigate("/products")}
+            >
+              상품페이지
+            </Button>
             <Button onClick={logButtonHandler}>로그아웃</Button>
           </div>
         ) : (
-          <Button
-            className={path === "/login" || path === "/sign-up" ? "hidden" : ""}
-            onClick={logButtonHandler}
-          >
-            로그인
-          </Button>
+          !loading && (
+            <Button
+              className={
+                path === "/login" || path === "/sign-up" ? "hidden" : "none"
+              }
+              onClick={logButtonHandler}
+            >
+              로그인
+            </Button>
+          )
         )}
       </nav>
     </div>

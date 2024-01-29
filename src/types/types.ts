@@ -20,3 +20,27 @@ export interface IProduct {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface IInpiniteProduct {
+  sortedProductsArray: IProduct[];
+  nextPageParam: number | null;
+}
+
+export type objectType = {
+  [key: string]: any;
+};
+
+export type IResolveParams = {
+  provider: string;
+  data?: objectType;
+};
+
+export interface IGoogleUser {
+  email: string;
+  given_name: string;
+  id: string;
+  locale: string;
+  name: string;
+  picture: string;
+  verified_email: boolean;
+}

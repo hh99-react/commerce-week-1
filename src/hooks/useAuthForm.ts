@@ -13,11 +13,13 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
-import { auth, db } from "@/firebase";
+import { auth } from "@/firebase";
 import { getDatabase, ref, child, get, set } from "firebase/database";
 
 import { IUser } from "@/types/types";
 import { useUser } from "@/store/UserContext";
+import { addUserToDatabase, getUserFromDatabase } from "@/lib/api/user";
+import useUserMutations from "./queries/user/useUserMutations";
 
 export type ServerErrorResponse = {
   message: string;
@@ -27,7 +29,8 @@ const useAuthForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { setUser } = useUser();
+  const { setUser, setIsSeller } = useUser();
+  const { addUserMutation } = useUserMutations();
 
   const loginForm = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
@@ -41,12 +44,6 @@ const useAuthForm = () => {
   const signUpForm = useForm<z.infer<typeof signUpFormSchema>>({
     resolver: zodResolver(signUpFormSchema),
     mode: "onChange",
-    defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    },
   });
 
   const addUser = async (
@@ -66,9 +63,7 @@ const useAuthForm = () => {
       createdAt: date,
       updatedAt: date,
     };
-    set(ref(db, "users/" + newUser.id), newUser);
-    setUser(newUser);
-    localStorage.setItem("userId", newUser.id);
+    addUserMutation.mutate(newUser);
   };
 
   const onAuthenticationSuccess = () => {
@@ -114,21 +109,11 @@ const useAuthForm = () => {
   };
 
   const getUserInfoAndSetContext = async (userId: string) => {
-    const dbRef = ref(getDatabase());
-
-    try {
-      const snapshot = await get(child(dbRef, `users/${userId}`));
-
-      if (snapshot.exists()) {
-        const user = snapshot.val();
-        setUser(user);
-        localStorage.setItem("userId", user.id);
-      } else {
-        console.log("No data available");
-      }
-    } catch (error) {
-      console.error(error);
-    }
+    const user = await getUserFromDatabase(userId);
+    setUser(user);
+    setIsSeller(user.isSeller);
+    localStorage.setItem("userId", user.id);
+    localStorage.setItem("isSeller", String(user.isSeller));
   };
 
   const onSubmitLogin = async (values: z.infer<typeof loginFormSchema>) => {
