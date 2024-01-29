@@ -42,16 +42,7 @@ const GoogleLogin = ({
   const scriptNodeRef = useRef<HTMLScriptElement>(null!);
   const [isSdkLoaded, setIsSdkLoaded] = useState(false);
   const [instance, setInstance] = useState<any>(null!);
-  const redirect_uri =
-    process.env.NODE_ENV === "production"
-      ? "https://commerce-week-1.vercel.app/"
-      : "http://localhost:5173";
-
-  if (process.env.NODE_ENV === "production") {
-    console.log = function no_console() {};
-    console.warn = function no_console() {};
-    console.error = function no_console() {};
-  }
+  const redirect_uri = "https://commerce-week-1.vercel.app";
 
   useEffect(() => {
     !isSdkLoaded && load();
@@ -106,7 +97,6 @@ const GoogleLogin = ({
               data: res,
             });
           } else {
-            // 사용자 정보를 가져오기
             fetch(
               `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${res.access_token}`
             )
@@ -141,6 +131,7 @@ const GoogleLogin = ({
 
   const handleError = useCallback(
     (res: objectType) => {
+      console.log("여기니???????????");
       onReject({
         provider: "google",
         data: res,
@@ -154,6 +145,7 @@ const GoogleLogin = ({
       setIsSdkLoaded(true);
     } else {
       insertScriptGoogle(document, "script", SCRIPT_ID, JS_SRC, () => {
+        console.log("typeResponse", typeResponse);
         const params = {
           client_id,
           ux_mode,
@@ -190,6 +182,8 @@ const GoogleLogin = ({
         }
 
         if (client) setInstance(client);
+        console.log(client);
+
         setIsSdkLoaded(true);
       });
     }
