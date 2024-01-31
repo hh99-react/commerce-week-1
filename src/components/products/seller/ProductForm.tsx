@@ -38,7 +38,6 @@ const ProductForm = () => {
     isErrorSingleProductData,
     isLoadingSingleProductData,
   } = useSingleProductQueries({
-    userId: userId as string,
     productId: updateProductId as string,
   });
 
@@ -111,7 +110,7 @@ const ProductForm = () => {
                         <SelectContent>
                           <SelectItem value="earring">귀걸이</SelectItem>
                           <SelectItem value="necklace">목걸이</SelectItem>
-                          <SelectItem value="user">반지</SelectItem>
+                          <SelectItem value="ring">반지</SelectItem>
                           <SelectItem value="bracelet">팔찌</SelectItem>
                         </SelectContent>
                       </Select>

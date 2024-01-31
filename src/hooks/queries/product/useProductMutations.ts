@@ -59,13 +59,12 @@ const useProductMutations = ({
   const deleteProductMutation = useMutation({
     mutationFn: async ({
       productId,
-      sellerId,
     }: {
       productId: string;
       sellerId: string;
     }) => {
       await deleteProductImages(productId);
-      await deleteProduct(productId, sellerId);
+      await deleteProduct(productId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

@@ -10,7 +10,8 @@ import {
   child,
   orderByChild,
   limitToLast,
-  endAt,
+  startAt,
+  endBefore,
 } from "firebase/database";
 
 export const getProductsBySeller = async (
@@ -19,9 +20,10 @@ export const getProductsBySeller = async (
 ) => {
   const dbRef = ref(getDatabase());
   const queryRef = query(
-    child(dbRef, `products/${userId}/`),
-    orderByChild("createdAt"),
-    endAt(pageParam - 1),
+    child(dbRef, "products"),
+    orderByChild("user_createdAt"),
+    startAt(userId),
+    endBefore(`${userId}_${pageParam - 1}`),
     limitToLast(12)
   );
   try {
@@ -46,9 +48,9 @@ export const getProductsBySeller = async (
   }
 };
 
-export const getSingleProduct = async (userId: string, productId: string) => {
+export const getSingleProduct = async (productId: string) => {
   const db = getDatabase();
-  const userProductPath = `products/${userId}/${productId}`;
+  const userProductPath = `products/${productId}`;
   const q = query(ref(db, userProductPath));
 
   try {
@@ -68,7 +70,7 @@ export const addProduct = async (
   newProduct: IProduct,
   imageDownloadURLs: string[]
 ) => {
-  const { id: productId, sellerId } = newProduct;
+  const { id: productId, sellerId, productCategory, productPrice } = newProduct;
   const timestampCreatedAt = newProduct.createdAt.getTime();
   const timestampUpdatedAt = newProduct.updatedAt.getTime();
 
@@ -77,10 +79,13 @@ export const addProduct = async (
     productImage: imageDownloadURLs,
     createdAt: timestampCreatedAt,
     updatedAt: timestampUpdatedAt,
+    user_createdAt: `${sellerId}_${timestampCreatedAt}`,
+    category_createdAt: `${productCategory}_${timestampCreatedAt}`,
+    category_price: `${productCategory}_${productPrice}`,
   };
   try {
     const db = getDatabase();
-    set(ref(db, `products/${sellerId}/${productId}`), productWithImagesAndTime);
+    set(ref(db, `products/${productId}`), productWithImagesAndTime);
   } catch (error) {
     console.error(error);
   }
@@ -90,7 +95,7 @@ export const updateProduct = async (
   updateProduct: IProduct,
   imageDownloadURLs: string[]
 ) => {
-  const { id: productId, sellerId } = updateProduct;
+  const { id: productId } = updateProduct;
   const timestampUpdatedAt =
     updateProduct.updatedAt instanceof Date
       ? updateProduct.updatedAt.getTime()
@@ -101,13 +106,10 @@ export const updateProduct = async (
     updatedAt: timestampUpdatedAt,
   };
   const db = getDatabase();
-  update(
-    ref(db, `products/${sellerId}/${productId}`),
-    productWithImagesAndTime
-  );
+  update(ref(db, `products/${productId}`), productWithImagesAndTime);
 };
 
-export const deleteProduct = async (productId: string, sellerId: string) => {
+export const deleteProduct = async (productId: string) => {
   const db = getDatabase();
-  remove(ref(db, `products/${sellerId}/${productId}`));
+  remove(ref(db, `products/${productId}`));
 };
